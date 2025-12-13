@@ -11,15 +11,15 @@ import java.util.function.IntFunction;
 public class CSVloader {
 
     public static <T> T[] cargar(
-            String resourceName,
-            Function<String, T> parser,
-            IntFunction<T[]> arrayCreator
+            String nombreRecurso, //Ruta donde se ubica
+            Function<String, T> parser, //Convierte una lúnea en un objeto
+            IntFunction<T[]> creadorArreglo
     ) throws Exception {
-
-        InputStream is = CSVloader.class.getResourceAsStream("/" + resourceName);
+        //Algo a recalcar es que busca por los resoruces
+        InputStream is = CSVloader.class.getResourceAsStream("/" + nombreRecurso);
 
         if (is == null) {
-            throw new Exception("No se encontró el recurso: " + resourceName);
+            throw new Exception("No se encontró el recurso: " + nombreRecurso);
         }
 
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -32,10 +32,15 @@ public class CSVloader {
 
         while ((line = br.readLine()) != null) {
             if (!line.trim().isEmpty()) {
-                list.add(parser.apply(line));
+
+                T obj = parser.apply(line);
+                if (obj != null) {
+                    list.add(obj);
+                }
+
             }
         }
 
-        return list.toArray(arrayCreator.apply(0));
+        return list.toArray(creadorArreglo.apply(0));
     }
 }

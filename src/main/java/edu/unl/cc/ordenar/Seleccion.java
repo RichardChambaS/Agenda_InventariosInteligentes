@@ -6,25 +6,25 @@ import java.util.Comparator;
 public class Seleccion<T> implements Ordenar_I<T> {
 
     @Override
-    public void sort(T[] array, Comparator<T> cmp, MetricasOrden metrics) {
+    public void ordenar(T[] arreglo, Comparator<T> cmp, MetricasOrden metricas) {
 
-        for (int i = 0; i < array.length - 1; i++) {
+        for (int i = 0; i < arreglo.length - 1; i++) {
             int minIndex = i;
 
-            for (int j = i + 1; j < array.length; j++) {
+            for (int j = i + 1; j < arreglo.length; j++) {
 
-                metrics.comparisons++;
+                metricas.comparaciones++;
 
-                if (cmp.compare(array[j], array[minIndex]) < 0) {
+                if (cmp.compare(arreglo[j], arreglo[minIndex]) < 0) {
                     minIndex = j;
                 }
             }
 
             if (minIndex != i) {
-                T temp = array[i];
-                array[i] = array[minIndex];
-                array[minIndex] = temp;
-                metrics.swaps++;
+                T temp = arreglo[i];
+                arreglo[i] = arreglo[minIndex];
+                arreglo[minIndex] = temp;
+                metricas.intercambios++;
             }
         }
     }
