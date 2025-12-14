@@ -47,4 +47,12 @@ public class Citas implements Comparable<Citas> {
         }
     }
 
+    // Necesario para búsqueda compara por id
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Citas otra = (Citas) obj;
+        return this.id.equals(otra.id);
+    }
 }

@@ -12,9 +12,17 @@ public class Pacientes implements Comparable<Pacientes> {
         this.prioridad = prioridad;
     }
 
-    public String getId() { return id; }
-    public String getApellido() { return apellido; }
-    public int getPrioridad() { return prioridad; }
+    public String getId() {
+        return id;
+    }
+
+    public String getApellido() {
+        return apellido;
+    }
+
+    public int getPrioridad() {
+        return prioridad;
+    }
 
     @Override
     public int compareTo(Pacientes other) {
@@ -37,10 +45,22 @@ public class Pacientes implements Comparable<Pacientes> {
         );
     }
 
+    private Pacientes siguiente;
 
-    @Override
-    public String toString() {
-        return id + ";" + apellido + ";" + prioridad;
+    public Pacientes getSiguiente() {
+        return siguiente;
     }
 
+    public void setSiguiente(Pacientes siguiente) {
+        this.siguiente = siguiente;
+    }
+
+    // Para búsquedas en SLL compara por ID
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Pacientes otro = (Pacientes) obj;
+        return this.id.equals(otro.id);
+    }
 }
