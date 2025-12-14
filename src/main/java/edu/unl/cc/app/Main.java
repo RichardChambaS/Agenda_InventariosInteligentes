@@ -1,195 +1,278 @@
 package edu.unl.cc.app;
 
-import edu.unl.cc.modelo.*;
-import edu.unl.cc.ordenar.*;
+import edu.unl.cc.modelo.Citas;
 import edu.unl.cc.servicio.*;
-
+import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Scanner;
 
-import static edu.unl.cc.utilidades.Imprimir.imprimirArreglo;
-
 public class Main {
+    private static final Scanner sc = new Scanner(System.in);
+
+    private static final AgendaServicio agenda = new AgendaServicio();
+    private static final InventarioServicio inventario = new InventarioServicio();
+    private static final PacienteServicio pacientes = new PacienteServicio();
 
     public static void main(String[] args) {
+        boolean ejecutando = true;
 
-        Scanner sc = new Scanner(System.in);
+        while (ejecutando) {
+            System.out.println("\n==============================================");
+            System.out.println("      SISTEMA VETERINARIO - MENU PRINCIPAL");
+            System.out.println("==============================================");
+            System.out.println("1. Gestionar Agenda (Datos Aleatorios - 100)");
+            System.out.println("2. Gestionar Agenda (Casi Ordenados - 100)");
+            System.out.println("3. Gestionar Inventario (Por Stock)");
+            System.out.println("4. Gestionar Pacientes (Busquedas)");
+            System.out.println("5. Ejecutar Experimentos Globales (Automatico)");
+            System.out.println("0. Salir");
+            System.out.println("==============================================");
+            System.out.print("Seleccione una opcion: ");
 
-        AgendaServicio agenda = new AgendaServicio();
-        InventarioServicio inventario = new InventarioServicio();
-        PacienteServicio pacientes = new PacienteServicio();
+            int opcion = leerEntero();
 
-        boolean running = true;
-
-        try {
-            while (running) {
-
-                System.out.println("\n=========== MENÚ PRINCIPAL ===========");
-                System.out.println("Elija qué archivo desea ordenar, comparar y buscar");
-                System.out.println("1. citas_100.csv");
-                System.out.println("2. citas_100_casi_ordenadas.csv");
-                System.out.println("3. inventario_500_inverso.csv");
-                System.out.println("4. pacientes_500.csv");
-                System.out.println("0. Salir");
-                System.out.print("Seleccione: ");
-
-                int op = sc.nextInt();
-                sc.nextLine();
-
-                switch (op) {
-
-                    // -------------------------------------------------
-                    // CITAS ALEATORIAS
-                    // -------------------------------------------------
-                    case 1 -> ejecutarAgenda(
-                            agenda,
-                            "citas_100.csv",
-                            "CITAS ALEATORIAS",
-                            sc
-                    );
-
-                    // -------------------------------------------------
-                    // CITAS CASI ORDENADAS
-                    // -------------------------------------------------
-                    case 2 -> ejecutarAgenda(
-                            agenda,
-                            "citas_100_casi_ordenadas.csv",
-                            "CITAS CASI ORDENADAS",
-                            sc
-
-                    );
-
-                    // -------------------------------------------------
-                    // INVENTARIO
-                    // -------------------------------------------------
-                    case 3 -> {
-                        inventario.cargarInventario("inventario_500_inverso.csv");
-
-                        System.out.println("\n>>> INVENTARIO (ordenado por stock) <<<");
-
-                        MetricasOrden mb = medir(() -> inventario.ordenarBurbuja());
-                        MetricasOrden mi = medir(() -> inventario.ordenarInsercion());
-                        MetricasOrden ms = medir(() -> inventario.ordenarSeleccion());
-
-                        imprimirTablaMetricas("INVENTARIO", mb, mi, ms);
-                        Recomendation.generar(inventario.getItems(), mb, mi, ms);
-
-                        System.out.print("¿Imprimir inventario ordenado? (s/n): ");
-                        if (sc.nextLine().equalsIgnoreCase("s")) {
-                            imprimirArreglo(inventario.getItems());
-                        }
-
-                        System.out.print("Buscar stock exacto: ");
-                        int st = sc.nextInt();
-                        sc.nextLine();
-                        System.out.println("Resultado: " + inventario.buscarExactoPorStock(st));
-                    }
-
-                    // -------------------------------------------------
-                    // PACIENTES
-                    // -------------------------------------------------
-                    case 4 -> {
-                        pacientes.cargarPacientes("pacientes_500.csv");
-
-                        System.out.println("\n>>> PACIENTES <<<");
-
-                        System.out.print("Apellido a buscar: ");
-                        String ap = sc.nextLine();
-
-                        System.out.println("Primero: " + pacientes.buscarPrimeroPorApellido(ap));
-                        System.out.println("Último:  " + pacientes.buscarUltimoPorApellido(ap));
-                        System.out.println("Prioridad alta: " +
-                                pacientes.buscarPrioridadAlta().size());
-                    }
-
-                    case 0 -> running = false;
-
-                    default -> System.out.println("Opción no válida.");
+            try {
+                switch (opcion) {
+                    case 1:
+                        gestionarAgenda("citas_100.csv", "ALEATORIA");
+                        break;
+                    case 2:
+                        gestionarAgenda("citas_100_casi_ordenadas.csv", "CASI ORDENADA");
+                        break;
+                    case 3:
+                        gestionarInventario();
+                        break;
+                    case 4:
+                        gestionarPacientes();
+                        break;
+                    case 5:
+                        Experimentos.ejecutarTodo(new AgendaServicio(), new InventarioServicio());
+                        break;
+                    case 0:
+                        ejecutando = false;
+                        System.out.println("Saliendo del sistema...");
+                        break;
+                    default:
+                        System.out.println(" Opcion no valida.");
                 }
+            } catch (Exception e) {
+                System.out.println("[ERROR] " + e.getMessage());
+                e.printStackTrace();
             }
+        }
+    }
+
+    // ================================================================
+    // OPCION 1 Y 2: AGENDA
+    // ================================================================
+    private static void gestionarAgenda(String archivo, String tipo) throws Exception {
+        System.out.println("\n--- PROCESANDO AGENDA: " + tipo + " ---");
+
+        // 1. Mostrar comparativa (Experimentos)
+        System.out.println(">> Analisis de algoritmos...");
+        Experimentos.compararAlgoritmosAgenda(agenda, archivo);
+
+        // 2. Dejar ordenado para busquedas
+        System.out.println(">> Ordenando por Insercion...");
+        agenda.cargarCitas(archivo); // Recargamos para asegurar
+        agenda.ordenarInsercion();
+
+        boolean enSubmenu = true;
+        while (enSubmenu) {
+            System.out.println("\n   >> SUBMENU AGENDA (" + tipo + ")");
+            System.out.println("   1. Buscar Cita Exacta (Binaria)");
+            System.out.println("   2. Buscar Citas por Rango (Fechas)");
+            System.out.println("   3. Ver lista de citas (Imprimir)");
+            System.out.println("   0. Volver al Menu Principal");
+            System.out.print("   Opcion: ");
+
+            int subOp = leerEntero();
+            switch (subOp) {
+                case 1:
+                    buscarCitaExacta();
+                    break;
+                case 2:
+                    buscarCitaRango();
+                    break;
+                case 3:
+                    imprimirListaDirecta(agenda.getCitas());
+                    break;
+                case 0:
+                    enSubmenu = false;
+                    break;
+                default:
+                    System.out.println("   [ERROR] Opcion invalida.");
+            }
+        }
+    }
+
+    private static void buscarCitaExacta() {
+        System.out.print("   Ingrese fecha exacta (yyyy-MM-dd HH:mm): ");
+        try {
+            String fechaStr = sc.nextLine();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            Citas clave = new Citas("", "", sdf.parse(fechaStr));
+
+            int indice = agenda.buscarExacta(clave);
+
+            if (indice != -1) {
+                System.out.println("   [ENCONTRADO] " + agenda.getCitas()[indice]);
+            } else {
+                System.out.println("   [INFO] No se encontro cita en esa fecha.");
+            }
+        } catch (Exception e) {
+            System.out.println("   [ERROR] Formato de fecha incorrecto o datos no cargados.");
+        }
+    }
+
+    private static void buscarCitaRango() {
+        System.out.println("   --- Busqueda por Rango ---");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        try {
+            System.out.print("   Fecha Inicio: ");
+            Citas inicio = new Citas("", "", sdf.parse(sc.nextLine()));
+            System.out.print("   Fecha Fin:    ");
+            Citas fin = new Citas("", "", sdf.parse(sc.nextLine()));
+
+            Citas[] resultados = agenda.buscarPorRangoFechas(inicio, fin);
+
+            System.out.println("   [RESULTADO] Se encontraron " + resultados.length + " citas.");
+            imprimirListaDirecta(resultados); // Imprimir resultados del rango
 
         } catch (Exception e) {
-            System.out.println("ERROR: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("   [ERROR] Error en las fechas.");
+        }
+    }
+
+    // ================================================================
+    //  OPCION 3: INVENTARIO
+    // ================================================================
+    private static void gestionarInventario() throws Exception {
+        System.out.println("\n--- GESTION DE INVENTARIO ---");
+        System.out.println(">> Cargando y ordenando por Stock...");
+
+        try {
+            inventario.cargarInventario("inventario_500_inverso.csv");
+
+            // Ordenamos para poder buscar y ver la lista ordenada
+            inventario.ordenarInsercion();
+            System.out.println("[OK] Inventario cargado y ordenado (" + inventario.getItems().length + " productos).");
+
+        } catch (Exception e) {
+            System.out.println("[ERROR] No se pudo cargar el archivo inventario. Revise el nombre.");
+            return;
         }
 
-        System.out.println("\nPrograma finalizado.");
+        boolean enSubmenu = true;
+        while (enSubmenu) {
+            System.out.println("\n >> SUBMENU INVENTARIO");
+            System.out.println("   1. Consultar Producto por Stock (Busqueda Binaria)");
+            System.out.println("   2. Ver todo el inventario (Lista Completa)");
+            System.out.println("   0. Volver al menu principal");
+            System.out.print("   Opcion: ");
+
+            int subOp = leerEntero();
+            switch (subOp) {
+                case 1:
+                    System.out.print("   Ingrese cantidad de stock a buscar: ");
+                    int stockBuscado = leerEntero();
+                    if (stockBuscado == -1) break;
+
+                    int indice = inventario.buscarExactoPorStock(stockBuscado);
+
+                    if (indice != -1) {
+                        var item = inventario.getItems()[indice];
+                        System.out.println("\n   [ENCONTRADO]");
+                        System.out.println("   ---------------------------");
+                        System.out.println("   ID:       " + item.getId());
+                        System.out.println("   Producto: " + item.getInsumo());
+                        System.out.println("   Stock:    " + item.getStock());
+                        System.out.println("   ---------------------------");
+                    } else {
+                        System.out.println("   [INFO] No hay ningun producto con stock exacto de " + stockBuscado);
+                    }
+                    break;
+
+                case 2:
+                    imprimirListaDirecta(inventario.getItems());
+                    break;
+
+                case 0:
+                    enSubmenu = false;
+                    break;
+                default:
+                    System.out.println("   Opcion no valida.");
+            }
+        }
     }
 
-    // =========================================================
-    // MÉTODOS AUXILIARES
-    // =========================================================
-
-    private static void ejecutarAgenda(
-            AgendaServicio agenda,
-            String archivo,
-            String titulo,
-            Scanner sc
-    ) throws Exception {
-
-        agenda.cargarCitas(archivo);
-
-        System.out.println("\n>>> " + titulo + " <<<");
-
-        Citas[] original = agenda.getCitas();
-
-    // Burbuja
-        agenda.setCitas(original.clone());
-        MetricasOrden mb = medir(() -> agenda.ordenarBurbuja());
-
-    // Inserción
-        agenda.setCitas(original.clone());
-        MetricasOrden mi = medir(() -> agenda.ordenarInsercion());
-
-    // Selección
-        agenda.setCitas(original.clone());
-        MetricasOrden ms = medir(() -> agenda.ordenarSeleccion());
-
-
-        imprimirTablaMetricas(titulo, mb, mi, ms);
-        Recomendation.generar(agenda.getCitas(), mb, mi, ms);
-
-        System.out.print("¿Imprimir citas ordenadas? (s/n): ");
-        if (sc.nextLine().equalsIgnoreCase("s")) {
-            imprimirArreglo(agenda.getCitas());
+    // ================================================================
+    // OPCION 4: PACIENTES
+    // ================================================================
+    private static void gestionarPacientes() throws Exception {
+        System.out.println("\n--- GESTION DE PACIENTES ---");
+        try {
+            pacientes.cargarSiEstaVacio("pacientes_500.csv");
+        } catch (Exception e) {
+            System.out.println("[ERROR] Falla al cargar pacientes.csv. Verifique que el archivo exista.");
+            return;
         }
 
-        System.out.print("Buscar por apellido: ");
-        String ap = sc.nextLine();
+        boolean enSubmenu = true;
+        while (enSubmenu) {
+            System.out.println("\n   >> SUBMENU PACIENTES");
+            System.out.println("   1. Buscar por Apellido");
+            System.out.println("   2. Listar Alta Prioridad (1)");
+            System.out.println("   0. Volver");
+            System.out.print("   Opcion: ");
 
-        System.out.println("Primera coincidencia: " +
-                agenda.buscarPrimeraPorApellido(ap));
-        System.out.println("Última coincidencia:  " +
-                agenda.buscarUltimaPorApellido(ap));
+            int subOp = leerEntero();
+            switch (subOp) {
+                case 1:
+                    System.out.print("   Ingrese Apellido: ");
+                    String apellido = sc.nextLine();
+
+                    var primero = pacientes.buscar(apellido, true);
+
+                    if (primero != null) {
+                        System.out.println("   [PRIMERA COINCIDENCIA] " + primero.dato);
+                        var ultimo = pacientes.buscar(apellido, false);
+                        if (ultimo != null && ultimo.indice != primero.indice) {
+                            System.out.println("   [ULTIMA COINCIDENCIA]  " + ultimo.dato);
+                        }
+                    } else {
+                        System.out.println("   [INFO] No encontrado.");
+                    }
+                    break;
+                case 2:
+                    System.out.println("   Buscando prioridad 1...");
+                    List<?> lista = pacientes.buscarPrioridadAlta();
+                    if (lista.isEmpty()) System.out.println("   Ninguno encontrado.");
+                    else for(Object o : lista) System.out.println("   -> " + o);
+                    break;
+                case 0:
+                    enSubmenu = false;
+                    break;
+            }
+        }
     }
 
-    private static MetricasOrden medir(SortAction action) {
-        long t = System.nanoTime();
-        MetricasOrden m = action.run();
-        m.tiempoNs = System.nanoTime() - t;
-        return m;
+    // ================================================================
+    // UTILIDADES
+    // ================================================================
+    private static int leerEntero() {
+        try { return Integer.parseInt(sc.nextLine()); } catch (Exception e) { return -1; }
     }
 
-    @FunctionalInterface
-    private interface SortAction {
-        MetricasOrden run();
-    }
-
-    private static void imprimirTablaMetricas(
-            String titulo,
-            MetricasOrden b,
-            MetricasOrden i,
-            MetricasOrden s
-    ) {
-        System.out.println("\n========= RESULTADOS " + titulo + " =========");
-        System.out.printf("%-12s %-15s %-15s %-15s\n",
-                "Algoritmo", "Comparaciones", "Intercambios", "Tiempo(ns)");
-        System.out.println("--------------------------------------------------------");
-
-        System.out.printf("%-12s %-15d %-15d %-15d\n",
-                "Burbuja", b.comparaciones, b.intercambios, b.tiempoNs);
-        System.out.printf("%-12s %-15d %-15d %-15d\n",
-                "Inserción", i.comparaciones, i.intercambios, i.tiempoNs);
-        System.out.printf("%-12s %-15d %-15d %-15d\n",
-                "Selección", s.comparaciones, s.intercambios, s.tiempoNs);
+    private static <T> void imprimirListaDirecta(T[] arreglo) {
+        if (arreglo == null || arreglo.length == 0) {
+            System.out.println("   [AVISO] La lista esta vacia o no se cargo correctamente.");
+            return;
+        }
+        System.out.println("--- INICIO DE LISTA (" + arreglo.length + " registros) ---");
+        for (T t : arreglo) {
+            System.out.println(t);
+        }
+        System.out.println("--- FIN DE LISTA ---");
     }
 }

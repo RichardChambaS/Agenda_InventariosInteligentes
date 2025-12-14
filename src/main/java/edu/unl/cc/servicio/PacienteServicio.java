@@ -3,42 +3,40 @@ package edu.unl.cc.servicio;
 import edu.unl.cc.modelo.Pacientes;
 import edu.unl.cc.busqueda.BusquedaLineal;
 import edu.unl.cc.utilidades.CSVloader;
+import edu.unl.cc.utilidades.SLL;
 
 import java.util.List;
 
 public class PacienteServicio {
 
-    private Pacientes[] pacientes;
+    private SLL<Pacientes> listaPacientes = new SLL<>();
 
-    public void cargarPacientes(String archivoCSV) throws Exception {
-        pacientes = CSVloader.cargar(
-                archivoCSV,
-                (linea) -> {
-                    String[] p = linea.split(";");
-                    return new Pacientes(p[0], p[1], Integer.parseInt(p[2]));
-                },
-                Pacientes[]::new
-        );
+    public void cargarSiEstaVacio(String ruta) throws Exception {
+        if (listaPacientes.isEmpty()) {
+            Pacientes[] raw = CSVloader.cargar(ruta, Pacientes::fromCSV, Pacientes[]::new);
+            for (Pacientes p : raw) listaPacientes.add(p);
+        }
+    }
+
+    // Clase auxiliar para transportar respuesta (DTO)
+    public static class ResultadoBusqueda {
+        public int indice;
+        public Pacientes dato;
+        public ResultadoBusqueda(int i, Pacientes d) { this.indice = i; this.dato = d; }
     }
 
     // --------- BÚSQUEDAS ---------
 
-    public int buscarPrimeroPorApellido(String apellido) {
-        return BusquedaLineal.primera(pacientes,
-                p -> p.getApellido().equalsIgnoreCase(apellido));
-    }
-
-    public int buscarUltimoPorApellido(String apellido) {
-        return BusquedaLineal.ultima(pacientes,
-                p -> p.getApellido().equalsIgnoreCase(apellido));
+    // Metodo que devuelve el objeto y el índice
+    public ResultadoBusqueda buscar(String apellido, boolean esPrimera) {
+        int idx = listaPacientes.buscarIndice(p -> p.getApellido().equalsIgnoreCase(apellido), esPrimera);
+        if (idx != -1) {
+            return new ResultadoBusqueda(idx, listaPacientes.get(idx));
+        }
+        return null;
     }
 
     public List<Pacientes> buscarPrioridadAlta() {
-        return BusquedaLineal.findAll(pacientes,
-                p -> p.getPrioridad() == 1);
-    }
-
-    public Pacientes[] getPacientes() {
-        return pacientes;
+        return listaPacientes.findAll(p -> p.getPrioridad() == 1);
     }
 }

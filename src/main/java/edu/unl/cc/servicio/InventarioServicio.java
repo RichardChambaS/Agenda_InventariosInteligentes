@@ -28,6 +28,7 @@ public class InventarioServicio {
         );
     }
 
+
     public MetricasOrden ordenarBurbuja() {
         MetricasOrden m = new MetricasOrden();
         new Borbuja<Inventario>().ordenar(items, cmpStock, m);
