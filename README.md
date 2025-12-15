@@ -64,7 +64,7 @@ La búsqueda binaria resulta más eficiente cuando:
 
 **Uso de centinela y en el caso “no encontrado”**
 
-La técnica del centinela optimiza la búsqueda secuencial en arreglos al eliminar la verificación de límites dentro del bucle. Al insertar temporalmente la clave buscada como último elemento:
+La técnica de centinela optimiza la búsqueda secuencial en arreglos al eliminar la verificación de límites dentro del bucle. Al insertar temporalmente la clave buscada como último elemento:
 
  * Se garantiza la finalización del bucle.
  * Se reduce el número de comparaciones.
