@@ -54,8 +54,9 @@ La búsqueda binaria divide repetidamente todo el conjunto de datos a la mitad, 
 
 ## Tecnologías utilizadas
 
-* Lenguaje: **Java**
-* IDE: **IntelliJ IDEA**
+* Lenguaje: Java
+* IDE: IntelliJ IDEA
+* Sistema de control de versioes: Git: repositorio en Github
 
 ---
 
