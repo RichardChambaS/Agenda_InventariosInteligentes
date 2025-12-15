@@ -12,10 +12,9 @@
 * Implementar correctamente las variantes canónicas de **búsqueda secuencial** y **búsqueda binaria** en Java.
 * Analizar y validar los algoritmos mediante **casos borde**.
 * Justificar el uso de cada método de búsqueda según la **estructura de datos** utilizada (arreglos vs listas simplemente enlazadas - SLL).
+--- 
 
----
-
-## Marco teórico;
+## Marco teórico
 
 ### Búsqueda Secuencial
 
@@ -35,6 +34,7 @@ La búsqueda binaria divide repetidamente todo el conjunto de datos a la mitad, 
 * Requiere que los datos estén previamente ordenados.
 * Se aplica eficientemente sobre arreglos.
 
+---
 
 ## Compilación y ejecución
 
@@ -51,10 +51,13 @@ La búsqueda binaria divide repetidamente todo el conjunto de datos a la mitad, 
 ## Discución
 
 
+
 ## Tecnologías utilizadas
 
 * Lenguaje: **Java**
 * IDE: **IntelliJ IDEA**
+
+---
 
 ## Notas finales
 
