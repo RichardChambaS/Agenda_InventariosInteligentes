@@ -52,6 +52,13 @@ La búsqueda binaria divide repetidamente todo el conjunto de datos a la mitad, 
 
 
 
+## Comparación de métodos
+Criterio	Búsqueda Secuencial	Búsqueda Binaria
+Requiere ordenamiento	No	Sí
+Estructura compatible	Arreglo / SLL	Arreglo
+Complejidad temporal	O(n)	O(log n)
+Facilidad de implementación	Alta	Media
+
 ## Tecnologías utilizadas
 
 * Lenguaje: Java
