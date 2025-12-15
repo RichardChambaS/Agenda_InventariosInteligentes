@@ -84,7 +84,7 @@ La técnica de centinela optimiza la búsqueda secuencial en arreglos al elimina
 ## Notas finales
 
 * La elección del algoritmo depende del tamaño de la estructura y de si los datos están ordenados.
-* El uso de predicados permite generalizar la búsqueda y reutilizar código.
-* La técnica del centinela reduce comparaciones, optimizando la búsqueda secuencial en arreglos.
-* Para mayor información y resultados se debe leer el informe que también se encuentra en este repositorio. 
+* El uso de predicados nos permite generalizar la búsqueda y reutilizar código.
+* La técnica de centinela nos ayuda a reducir el número de comparaciones, optimizando la búsqueda secuencial en arreglos.
+* Para mayor información y resultados se puede leer el informe que también se encuentra en este repositorio. 
 
