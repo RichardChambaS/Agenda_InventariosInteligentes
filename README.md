@@ -12,7 +12,7 @@
 * Justificar el uso de cada método de búsqueda según la **estructura de datos** utilizada (arreglos vs listas simplemente enlazadas - SLL).
 --- 
 
-## Marco teórico
+## Conceptos clave
 
 ### Búsqueda Secuencial
 La búsqueda secuencial (o lineal) consiste en recorrer los elementos de una estructura de datos uno por uno hasta encontrar el valor deseado o llegar al final de la estructura.
