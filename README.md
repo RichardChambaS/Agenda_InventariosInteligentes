@@ -38,9 +38,9 @@ La búsqueda binaria divide repetidamente todo el conjunto de datos a la mitad, 
 
 ## Compilación y ejecución
 
-  * 1. Descargar el repositorio en una ubicacion de fácil acceso.
-  * 2. Abrir el proyecto con un IDE compatible con JAVA.
-  * 3. Ejecutar la clase principal SearchDemo.
+ 1. Descargar el repositorio en una ubicacion de fácil acceso.
+ 2. Abrir el proyecto con un IDE compatible con JAVA.
+ 3. Ejecutar la clase principal SearchDemo.
 
 ## Casos borde y precondiciones
 
