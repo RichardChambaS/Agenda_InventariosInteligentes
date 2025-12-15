@@ -63,9 +63,6 @@ public class AgendaServicio {
         return citas != null && citas.length > 0;
     }
 
-    public Citas[] getCitas() {
-        return citas;
-    }
 
     // ---------------- ORDENAR ----------------
 
@@ -115,6 +112,10 @@ public class AgendaServicio {
 
     public void setCitas(Citas[] citas) {
         this.citas = citas;
+    }
+    // En AgendaServicio.java
+    public Citas[] getCitas() {
+        return this.citas;
     }
 }
 

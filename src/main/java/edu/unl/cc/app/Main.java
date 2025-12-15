@@ -1,6 +1,7 @@
 package edu.unl.cc.app;
 
 import edu.unl.cc.modelo.Citas;
+import edu.unl.cc.modelo.Inventario;
 import edu.unl.cc.servicio.*;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -150,38 +151,65 @@ public class Main {
     private static void gestionarInventario() throws Exception {
         System.out.println("\n--- GESTION DE INVENTARIO ---");
         System.out.println(">> Cargando y ordenando por Stock...");
-
-        try {
-            inventario.cargarInventario("inventario_500_inverso.csv");
-
-            // Ordenamos para poder buscar y ver la lista ordenada
-            inventario.ordenarInsercion();
-            System.out.println("[OK] Inventario cargado y ordenado (" + inventario.getItems().length + " productos).");
-
-        } catch (Exception e) {
-            System.out.println("[ERROR] No se pudo cargar el archivo inventario. Revise el nombre.");
+        // 1. Mostrar comparativa (Experimentos)
+        Experimentos.compararAlgoritmosInventario(inventario, "inventario_500_inverso.csv");
+        System.out.println("\n[INFO] Aplicando ordenamiento final (Inserción) para habilitar búsquedas...");
+        inventario.ordenarInsercion();
+        if (inventario.getItems() == null || inventario.getItems().length == 0) {
+            System.out.println("[ERROR] No hay datos en el inventario. Revise el CSV.");
             return;
         }
+
+        System.out.println(">>> Inventario listo y ordenado (" + inventario.getItems().length + " productos).");
 
         boolean enSubmenu = true;
         while (enSubmenu) {
             System.out.println("\n >> SUBMENU INVENTARIO");
-            System.out.println("   1. Consultar Producto por Stock (Busqueda Binaria)");
+            System.out.println("   1. Consultar Producto por Rango de Stock (Busqueda Binaria)");
             System.out.println("   2. Ver todo el inventario (Lista Completa)");
+            System.out.println("   3. Buscar por Stock exacto (Estrategia Centinela)");
             System.out.println("   0. Volver al menu principal");
             System.out.print("   Opcion: ");
 
             int subOp = leerEntero();
             switch (subOp) {
                 case 1:
+                    System.out.println("\n--- Búsqueda por Rango (Bounds) ---");
+                    System.out.print("Ingrese Stock MÍNIMO: ");
+                    int min = leerEntero();
+                    System.out.print("Ingrese Stock MÁXIMO: ");
+                    int max = leerEntero();
+
+                    List<Inventario> resultados = inventario.buscarPorRango(min, max);
+
+                    if (resultados.isEmpty()) {
+                        System.out.println("No se encontraron productos en el rango [" + min + " - " + max + "].");
+                    } else {
+                        System.out.println("--- Productos encontrados: " + resultados.size() + " ---");
+                        for (Inventario inv : resultados) {
+                            System.out.println(inv);
+                        }
+                    }
+                    break;
+
+                case 2:
+                    imprimirListaDirecta(inventario.getItems());
+                    break;
+                case 3:
                     System.out.print("   Ingrese cantidad de stock a buscar: ");
-                    int stockBuscado = leerEntero();
-                    if (stockBuscado == -1) break;
+                    String stockBusq = sc.nextLine();
 
-                    int indice = inventario.buscarExactoPorStock(stockBuscado);
+                    // Verificamos que haya datos cargados
+                    if (inventario.getItems() == null) {
+                        try { inventario.cargarInventario("inventario_500_inverso.csv"); }
+                        catch(Exception e) { System.out.println("Error cargando: " + e.getMessage()); }
+                    }
 
-                    if (indice != -1) {
-                        var item = inventario.getItems()[indice];
+                    int idx = inventario.buscarCentinela(stockBusq);
+
+                    if (idx != -1) {
+                        System.out.println("¡Encontrado en índice " + idx + "!");
+                        var item = inventario.getItems()[idx ];
                         System.out.println("\n   [ENCONTRADO]");
                         System.out.println("   ---------------------------");
                         System.out.println("   ID:       " + item.getId());
@@ -189,12 +217,8 @@ public class Main {
                         System.out.println("   Stock:    " + item.getStock());
                         System.out.println("   ---------------------------");
                     } else {
-                        System.out.println("   [INFO] No hay ningun producto con stock exacto de " + stockBuscado);
+                        System.out.println("   [INFO] No hay ningun producto con stock exacto de " + stockBusq);
                     }
-                    break;
-
-                case 2:
-                    imprimirListaDirecta(inventario.getItems());
                     break;
 
                 case 0:
