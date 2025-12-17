@@ -1,7 +1,7 @@
 # Búsqueda en Java: Secuencial y Binaria
 
 ## Integrantes
-* Richar Chamba
+* Richard Chamba
 * Katheryn Contento
 * Julian Vega
 * Anthony Yaguana
