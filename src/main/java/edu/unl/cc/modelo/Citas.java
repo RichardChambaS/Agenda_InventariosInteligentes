@@ -27,8 +27,10 @@ public class Citas implements Comparable<Citas> {
 
     @Override
     public String toString() {
-        return id + ";" + apellido + ";" + fechaHora;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        return id + ";" + apellido + ";" + sdf.format(fechaHora);
     }
+
 
 
 

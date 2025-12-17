@@ -6,14 +6,14 @@ import java.util.Comparator;
 public class Borbuja<T> implements Ordenar_I<T> {
 
     @Override
-    public void sort(T[] array, Comparator<T> cmp, MetricasOrden metrics) {
+    public void ordenar(T[] array, Comparator<T> cmp, MetricasOrden metrics) {
 
         for (int i = 0; i < array.length - 1; i++) {
             boolean swapped = false;
 
             for (int j = 0; j < array.length - 1 - i; j++) {
 
-                metrics.comparisons++;
+                metrics.comparaciones++;
 
                 if (cmp.compare(array[j], array[j + 1]) > 0) {
 
@@ -21,7 +21,7 @@ public class Borbuja<T> implements Ordenar_I<T> {
                     array[j] = array[j + 1];
                     array[j + 1] = temp;
 
-                    metrics.swaps++;
+                    metrics.intercambios++;
                     swapped = true;
                 }
             }
