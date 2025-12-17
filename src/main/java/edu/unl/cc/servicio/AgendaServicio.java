@@ -16,32 +16,53 @@ import java.util.Comparator;
 public class AgendaServicio {
 
     private Citas[] citas;
+    private boolean estaOrdenado = false;
 
-    private final Comparator<Citas> cmpFecha =
-            (a, b) -> a.getFechaHora().compareTo(b.getFechaHora());
+    private final Comparator<Citas> cmpFecha = (a, b) -> a.getFechaHora().compareTo(b.getFechaHora());
 
-    public void cargarCitas(String archivoCSV) throws Exception {
+    public void cargarCitas(String archivo) throws Exception {
+        citas = CSVloader.cargar(archivo, linea -> {
+            try {
+                // 1. Separar por punto y coma (o coma, según tu CSV)
+                String[] partes = linea.split(";");
 
-        citas = CSVloader.cargar(
-                archivoCSV,
-                (linea) -> {
-                    try {
-                        String[] p = linea.split(";");
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+                // Validación básica de columnas
+                if (partes.length < 3) return null;
 
-                        return new Citas(
-                                p[0].trim(),
-                                p[1].trim(),
-                                sdf.parse(p[2].trim())
-                        );
-                    } catch (Exception e) {
-                        System.out.println("Línea inválida en Citas (IGNORADA): " + linea);
-                        return null;
-                    }
-                },
-                Citas[]::new
-        );
+                // 2. Parsear la fecha.
+                // OJO: Revisa si tu CSV usa "2024-01-01 10:00" (espacio) o "2024-01-01T10:00" (T)
+                // Usualmente en estos ejercicios es con 'T' o espacio. Pondré el formato estándar.
+                String fechaStr = partes[2].trim();
+                SimpleDateFormat sdf;
+
+                if (fechaStr.contains("T")) {
+                    sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+                } else {
+                    sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                }
+
+                // 3. Crear el objeto Citas (ID, Apellido, Fecha)
+                return new Citas(
+                        partes[0].trim(), // ID
+                        partes[1].trim(), // Apellido
+                        sdf.parse(fechaStr) // Fecha convertida
+                );
+            } catch (Exception e) {
+                // Si la línea falla, retornamos null y el CSVloader la ignora
+                 System.out.println("Error parseando linea: " + linea); // Descomentar para debug
+                return null;
+            }
+        }, Citas[]::new);
+
+        estaOrdenado = false; // Al cargar de nuevo, se pierde el orden
     }
+
+
+    // --- MÉTODOS DE VALIDACIÓN ---
+    public boolean tieneDatos() {
+        return citas != null && citas.length > 0;
+    }
+
 
     // ---------------- ORDENAR ----------------
 
@@ -54,6 +75,7 @@ public class AgendaServicio {
     public MetricasOrden ordenarInsercion() {
         MetricasOrden m = new MetricasOrden();
         new Insercion<Citas>().ordenar(citas, cmpFecha, m);
+        estaOrdenado = true;
         return m;
     }
 
@@ -66,33 +88,35 @@ public class AgendaServicio {
     // ---------------- BUSCAR ----------------
 
     public int buscarExacta(Citas key) {
+        if (!tieneDatos()) return -1;
+        if (!estaOrdenado) ordenarInsercion(); // Garantizar orden
         return BusquedaBinaria.buscar(citas, key, cmpFecha);
     }
 
-    public int buscarPrimeraPorApellido(String apellido) {
-        return BusquedaLineal.primera(citas, c -> c.getApellido().equalsIgnoreCase(apellido));
-    }
-
-    public int buscarUltimaPorApellido(String apellido) {
-        return BusquedaLineal.ultima(citas, c -> c.getApellido().equalsIgnoreCase(apellido));
-    }
-
     public Citas[] buscarPorRangoFechas(Citas inicio, Citas fin) {
+        if (!tieneDatos()) return new Citas[0];
+        if (!estaOrdenado) ordenarInsercion();
+
         int lb = Limites.lowerBound(citas, inicio, cmpFecha);
         int ub = Limites.upperBound(citas, fin, cmpFecha);
 
-        if (lb >= ub) return new Citas[0];
+        if (ub > citas.length) ub = citas.length; // Protección
+        int cantidad = ub - lb;
 
-        Citas[] r = new Citas[ub - lb];
-        System.arraycopy(citas, lb, r, 0, r.length);
-        return r;
+        if (cantidad <= 0) return new Citas[0];
+
+        Citas[] resultado = new Citas[cantidad];
+        System.arraycopy(citas, lb, resultado, 0, cantidad);
+        return resultado;
     }
 
     public void setCitas(Citas[] citas) {
         this.citas = citas;
     }
-
-    public Citas[] getCitas() { return citas; }
+    // En AgendaServicio.java
+    public Citas[] getCitas() {
+        return this.citas;
+    }
 }
 
 

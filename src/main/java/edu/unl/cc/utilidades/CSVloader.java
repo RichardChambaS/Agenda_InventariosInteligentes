@@ -1,8 +1,6 @@
 package edu.unl.cc.utilidades;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -15,15 +13,20 @@ public class CSVloader {
             Function<String, T> parser, //Convierte una lúnea en un objeto
             IntFunction<T[]> creadorArreglo
     ) throws Exception {
-        //Algo a recalcar es que busca por los resoruces
-        InputStream is = CSVloader.class.getResourceAsStream("/" + nombreRecurso);
 
-        if (is == null) {
-            throw new Exception("No se encontró el recurso: " + nombreRecurso);
+        File file = new File(nombreRecurso);
+
+        if (!file.exists()) {
+            // Intenta buscar agregando 'src/' por si acaso
+            file = new File("src/resources/" + nombreRecurso);
         }
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        if (!file.exists()) {
+            throw new FileNotFoundException("ERROR: No encuentro el archivo en: " + file.getAbsolutePath() +
+                    "\nASEGÚRATE de crear la carpeta 'resources' en la raíz del proyecto y poner los CSV ahí.");
+        }
 
+        BufferedReader br = new BufferedReader(new FileReader(file));
         List<T> list = new ArrayList<>();
         String line;
 

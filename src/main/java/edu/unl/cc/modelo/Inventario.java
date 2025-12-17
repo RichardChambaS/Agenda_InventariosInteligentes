@@ -33,7 +33,18 @@ public class Inventario implements Comparable<Inventario> {
 
     @Override
     public String toString() {
-        return id + ";" + insumo + ";" + stock;
+        String nombreCorto = (insumo.length() > 35) ? insumo.substring(0, 32) + "..." : insumo;
+        return String.format("| %-10s | %-32s | Stock: %5s |", id, nombreCorto, stock);
+    }
+
+    // En Inventario.java
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Inventario other = (Inventario) obj;
+        // Asumiendo que buscamos por stock o id, ajusta según lo que busques
+        return this.stock.equals(other.stock);
     }
 }
 
